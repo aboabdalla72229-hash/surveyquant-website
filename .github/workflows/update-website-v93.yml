@@ -1,0 +1,58 @@
+
+name: Update SurveyQuant Website Download to v1.0.93
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-website-download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout website repository
+        uses: actions/checkout@v4
+
+      - name: Update APK links and version labels
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          page = Path("index.html")
+          if not page.exists():
+              raise SystemExit("ERROR: index.html not found.")
+
+          content = page.read_text(encoding="utf-8")
+          old_url = "https://github.com/aboabdalla72229-hash/SurveyQuantAndroid_v1.0.57/releases/download/v1.0.91/SurveyQuant-v1.0.91.apk"
+          new_url = "https://github.com/aboabdalla72229-hash/SurveyQuantAndroid_v1.0.57/releases/download/v1.0.93/SurveyQuant_v1.0.93.apk"
+
+          if content.count(old_url) != 2:
+              raise SystemExit("ERROR: Expected exactly 2 old APK links.")
+
+          content = content.replace(old_url, new_url)
+
+          if content.count("v1.0.91") != 2:
+              raise SystemExit("ERROR: Unexpected old version label count.")
+
+          content = content.replace("v1.0.91", "v1.0.93")
+
+          if "v1.0.91" in content or content.count(new_url) != 2:
+              raise SystemExit("ERROR: Validation failed.")
+
+          page.write_text(content, encoding="utf-8")
+          print("Both download links and version labels updated.")
+          PY
+
+      - name: Commit and push website update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          git commit -m "Update website APK download to v1.0.93"
+          git push
