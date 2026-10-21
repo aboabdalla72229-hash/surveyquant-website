@@ -1,129 +1,136 @@
-name: Publish SurveyQuant Refund Policy and WhatsApp Contact
-
+name: Publish SurveyQuant Refund Policy, WhatsApp and 7-Day Trial
 on:
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
-  publish-refund-policy:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout website
         uses: actions/checkout@v4
-
-      - name: Add policy and update visible links
+      - name: Update pages
         shell: bash
         run: |
           python3 <<'PY'
           from pathlib import Path
           import re
 
-          policy = r'''<!doctype html>
-          <html lang="ar" dir="rtl">
-          <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width,initial-scale=1">
-          <meta name="theme-color" content="#0b2340">
-          <meta name="description" content="سياسة الاسترجاع ومراجعة مشكلات الدفع لتطبيق مكتب فني مساحة SurveyQuant.">
-          <title>سياسة الاسترجاع | SurveyQuant</title>
-          <style>
-          *{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f3f6fa;color:#263445;line-height:1.9}header{background:#0b2340;color:#fff;text-align:center;padding:30px 16px}header h1{margin:0 0 8px;font-size:28px}header p{margin:0;color:#dce8f5}main{max-width:900px;margin:25px auto;padding:clamp(19px,4vw,32px);background:#fff;border-radius:14px;box-shadow:0 4px 18px #0000000f}h2{color:#123b60;font-size:20px;margin-top:25px;border-bottom:1px solid #e5eaf0;padding-bottom:6px}a{color:#0877bd;overflow-wrap:anywhere}p,li{font-size:15px}.notice{background:#edf4fb;padding:14px 16px;border-radius:8px}.refund{background:#edf8f1;border-right:4px solid #24834b;padding:14px 18px;border-radius:8px}.btn{display:inline-block;background:#123b60;color:white;border-radius:9px;padding:10px 15px;text-decoration:none;font-weight:bold}.contact{direction:ltr;unicode-bidi:embed;display:inline-block;font-weight:bold}footer{text-align:center;padding:20px;color:#64748b;font-size:14px}@media(max-width:600px){main{margin:12px;padding:19px}header h1{font-size:23px}}
-          </style></head>
-          <body>
-          <header><h1>سياسة الاسترجاع عند فشل الدفع</h1><p>مكتب فني مساحة SurveyQuant</p></header>
-          <main>
-          <p class="notice"><strong>آخر تحديث:</strong> 13 أكتوبر 2026. هدف السياسة هو توضيح خطوات مراجعة عمليات الدفع التي لم يكتمل مقابلها تفعيل الخدمة.</p>
-          <h2>1. الحالات التي يمكن طلب مراجعتها</h2>
-          <ul>
-          <li><strong>تم خصم المبلغ ولم يظهر تأكيد للعملية:</strong> نتحقق من حالة العملية لدى مزوّد الدفع قبل تحديد الإجراء.</li>
-          <li><strong>تم الدفع ولم يتم تفعيل الاشتراك:</strong> بعد تأكيد نجاح الخصم، تتم مراجعة سبب عدم التفعيل ومعالجة المشكلة أو طلب الاسترداد إذا تعذر تقديم الخدمة المدفوعة.</li>
-          <li><strong>تم الخصم أكثر من مرة:</strong> نتحقق من العمليات المكررة، وتتم مراجعة أي خصم مكرر غير مستحق لاتخاذ إجراء الاسترداد المناسب.</li>
-          <li><strong>العملية معلّقة أو غير واضحة:</strong> قد يلزم انتظار الحالة النهائية من مزوّد الدفع قبل تحديد ما إذا كان الاسترداد مناسبًا.</li>
-          </ul>
-          <h2>2. طلب مراجعة أو استرجاع</h2>
-          <p>تواصل معنا عبر واتساب الرقم <strong class="contact">01118980717</strong>، واكتب «طلب مراجعة دفع» مع تاريخ العملية وقيمتها وطريقة الدفع ورقم الطلب أو مرجع العملية إن كان متاحًا. قد نطلب معلومات إضافية لازمة للتحقق.</p>
-          <p><a class="btn" href="https://wa.me/201118980717?text=%D8%B7%D9%84%D8%A8%20%D9%85%D8%B1%D8%A7%D8%AC%D8%B9%D8%A9%20%D8%AF%D9%81%D8%B9%20SurveyQuant" target="_blank" rel="noopener noreferrer">التواصل عبر واتساب</a></p>
-          <div class="notice"><strong>حماية بياناتك:</strong> لا ترسل رقم البطاقة كاملًا أو رمز الأمان CVV أو كلمة مرور أو رمز تحقق لمرة واحدة. أرسل رقم الطلب أو مرجع العملية فقط، مع إخفاء أي بيانات مالية حساسة.</div>
-          <h2>3. كيف يتم الاسترداد؟</h2>
-          <div class="refund"><p>إذا نجح الدفع وتعذر تفعيل الاشتراك بسبب خطأ تقني، قد يبدأ النظام طلب استرداد تلقائيًا عند توفر بيانات العملية المطلوبة. إذا كانت بيانات مزوّد الدفع غير مكتملة، أو لم يوجد سجل محلي للعملية، أو أعاد مزوّد الدفع حالة تتطلب مراجعة، فقد يلزم التدخل اليدوي ومتابعة الطلب.</p><p>أما حالات الخصم دون تأكيد أو الخصم المكرر، فتتم مراجعتها أولًا والتحقق منها لدى مزوّد الدفع قبل طلب الاسترداد.</p></div>
-          <p>عند الموافقة، يُطلب رد المبلغ إلى وسيلة الدفع الأصلية متى أتاح مزوّد الدفع ذلك. تختلف مدة ظهور المبلغ بحسب البنك أو جهة إصدار البطاقة ومزوّد الدفع، لذلك لا نضمن مدة زمنية ثابتة لوصوله.</p>
-          <h2>4. نقاط مهمة</h2>
-          <ul><li>إرسال الطلب لا يعني الموافقة التلقائية على الاسترداد؛ يلزم التحقق من حالة العملية.</li><li>لا يمكن تأكيد الاسترداد قبل ورود نتيجة أو تأكيد من مزوّد الدفع أو الجهة المالية المعنية.</li><li>إذا كانت العملية معلّقة فقط، فقد يكون الإجراء المناسب انتظار تسويتها أو إلغائها من جهة الدفع.</li></ul>
-          <h2>5. التواصل</h2>
-          <p>واتساب الدعم: <strong class="contact">01118980717</strong></p>
-          <p>البريد الإلكتروني: <a href="mailto:abo.abdalla72229@gmail.com">abo.abdalla72229@gmail.com</a></p>
-          <p><a class="btn" href="./index.html">العودة إلى موقع SurveyQuant</a></p>
-          </main><footer>© 2026 مكتب فني مساحة · SurveyQuant</footer>
-          </body></html>
-          '''
+          WA = "https://wa.me/201118980717"
 
-          Path("refund-policy.html").write_text(policy, encoding="utf-8")
+          # Homepage and seven-day trial
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+          for old, new in [
+              ("فترة تجريبية مجانية لمدة 3 أيام", "فترة تجريبية مجانية لمدة 7 أيام"),
+              ("3 أيام مجانية", "7 أيام مجانية"),
+              ("مدتها 3 أيام", "مدتها 7 أيام"),
+              ("مدة 3 أيام", "مدة 7 أيام"),
+              ("لمدة ثلاثة أيام", "لمدة سبعة أيام"),
+              ("مدتها ثلاثة أيام", "مدتها سبعة أيام"),
+              ("الفترة التجريبية المعلنة مدتها 3 أيام", "الفترة التجريبية المعلنة مدتها 7 أيام"),
+          ]:
+              s = s.replace(old, new)
 
-          homepage = Path("index.html")
-          if not homepage.exists():
-              raise SystemExit("ERROR: index.html is missing.")
-          content = homepage.read_text(encoding="utf-8")
+          # Main navigation only, avoiding the duplicate pricing link in footer.
+          a = s.find('<nav class="navlinks" id="navlinks"')
+          b = s.find("</nav>", a) if a >= 0 else -1
+          if a < 0 or b < 0:
+              raise SystemExit("ERROR: Main navigation was not found.")
+          nav = s[a:b]
+          if 'href="refund-policy.html"' not in nav:
+              anchor = '<a href="#pricing">الأسعار</a>'
+              if anchor not in nav:
+                  raise SystemExit("ERROR: Pricing link not found inside main navigation.")
+              nav = nav.replace(anchor, anchor + '<a href="refund-policy.html">سياسة الاسترجاع</a>', 1)
+              s = s[:a] + nav + s[b:]
 
-          nav_anchor = '<a href="#pricing">الأسعار</a>'
-          nav_link = '<a href="refund-policy.html">سياسة الاسترجاع</a>'
-          if nav_link not in content:
-              if content.count(nav_anchor) != 1:
-                  raise SystemExit("ERROR: Could not safely locate the pricing link in the top menu.")
-              content = content.replace(nav_anchor, nav_anchor + nav_link, 1)
+          # Pricing footnote
+          if 'class="plan-foot"' in s and 'سياسة الاسترجاع عند فشل الدفع' not in s:
+              s, n = re.subn(
+                  r'(<p class="plan-foot"[^>]*>.*?</p>)',
+                  lambda m: m.group(1)[:-4] + '<br><a href="refund-policy.html">سياسة الاسترجاع عند فشل الدفع أو عدم تفعيل الاشتراك</a> · <a href="' + WA + '" target="_blank" rel="noopener noreferrer">واتساب الدعم: 01118980717</a></p>',
+                  s, count=1, flags=re.S)
+              if n != 1:
+                  raise SystemExit("ERROR: Could not add refund link below prices.")
 
-          plan_text = 'الأسعار المعروضة هي الأسعار المحددة حاليًا من مطوّر التطبيق، وقد تُحدّث قبل شراء اشتراك جديد.'
-          plan_addition = '<br><a href="refund-policy.html">سياسة الاسترجاع عند فشل الدفع</a> · <a href="https://wa.me/201118980717" target="_blank" rel="noopener">واتساب الدعم: 01118980717</a>'
-          if 'سياسة الاسترجاع عند فشل الدفع</a>' not in content:
-              if content.count(plan_text) != 1:
-                  raise SystemExit("ERROR: Could not safely locate the note below the subscription prices.")
-              content = content.replace(plan_text, plan_text + plan_addition, 1)
+          # Footer link
+          fa = s.find('<nav class="footerlinks">')
+          fb = s.find("</nav>", fa) if fa >= 0 else -1
+          if fa >= 0 and fb >= 0:
+              footer = s[fa:fb]
+              if 'href="refund-policy.html"' not in footer:
+                  footer = footer.replace('<a href="privacy-policy.html">سياسة الخصوصية</a>',
+                                          '<a href="privacy-policy.html">سياسة الخصوصية</a><a href="refund-policy.html">سياسة الاسترجاع</a>', 1)
+                  s = s[:fa] + footer + s[fb:]
 
-          footer_privacy = '<a href="privacy-policy.html">سياسة الخصوصية</a>'
-          footer_refund = '<a href="refund-policy.html">سياسة الاسترجاع</a>'
-          if footer_refund not in content:
-              if content.count(footer_privacy) != 1:
-                  raise SystemExit("ERROR: Could not safely locate the privacy link in the footer.")
-              content = content.replace(footer_privacy, footer_privacy + footer_refund, 1)
+          s = s.replace("الموقع لا يستقبل المدفوعات في الوقت الحالي. لا تعتبر أي عملية اشتراك مفعّلة إلا بعد تأكيد وسيلة الدفع الرسمية وإتمام التفعيل.</li>",
+                        "الموقع لا يستقبل المدفوعات في الوقت الحالي. لا تعتبر أي عملية اشتراك مفعّلة إلا بعد تأكيد وسيلة الدفع الرسمية وإتمام التفعيل.</li><li>إذا خُصم مبلغ ولم تكتمل عملية الدفع أو لم يتم تفعيل الاشتراك بعد تأكيد الخصم، تتم مراجعة العملية وبدء إجراءات رد المبلغ المدفوع إلى وسيلة الدفع الأصلية وفق سياسة الاسترجاع.</li>")
+          note = '<p class="muted">بوابة الدفع الإلكتروني غير مفعّلة حاليًا في الموقع. لا ترسل بيانات بطاقتك البنكية أو كلمات المرور عبر البريد.</p>'
+          if note in s and WA not in s:
+              s = s.replace(note, note + '<p><a href="' + WA + '" target="_blank" rel="noopener noreferrer">واتساب الدعم: 01118980717</a></p>', 1)
+          p.write_text(s, encoding="utf-8")
 
-          homepage.write_text(content, encoding="utf-8")
+          # Privacy policy: trim accidental trailing workflow text and update trial/contact/refund.
+          p = Path("privacy-policy.html")
+          if p.exists():
+              s = p.read_text(encoding="utf-8")
+              end = s.lower().find("</html>")
+              if end >= 0:
+                  s = s[:end + 7] + "\n"
+              s = s.replace("12 أكتوبر 2026", "21 أكتوبر 2026").replace("13 أكتوبر 2026", "21 أكتوبر 2026")
+              s = s.replace("فترة تجريبية مجانية لمدة 3 أيام", "فترة تجريبية مجانية لمدة 7 أيام")
+              s = s.replace("فترة تجريبية لمدة ثلاثة أيام", "فترة تجريبية لمدة سبعة أيام")
+              s = s.replace("مدة 3 أيام", "مدة 7 أيام").replace("مدة ثلاثة أيام", "مدة سبعة أيام")
+              s = s.replace("01260019614", "01118980717").replace("+201260019614", "+201118980717")
+              heading = "<h2>13. التواصل</h2>"
+              if heading in s and "wa.me/201118980717" not in s:
+                  s = s.replace(heading, heading + '<p><strong>واتساب:</strong> <a href="' + WA + '" target="_blank" rel="noopener noreferrer">01118980717</a></p>', 1)
+              start = "<h2>10. سياسة الاسترجاع واسترداد المدفوعات</h2>"
+              finish = "<h2>11. المدفوعات عبر الموقع والتطبيق</h2>"
+              if start in s and finish in s:
+                  before, rest = s.split(start, 1)
+                  _, after = rest.split(finish, 1)
+                  section = '<h2>10. سياسة الاسترجاع واسترداد المدفوعات</h2><div class="refund"><strong>إذا تم خصم المبلغ ولم تكتمل عملية الدفع أو لم يتم تفعيل الاشتراك بعد تأكيد الخصم، تتم مراجعة العملية وبدء إجراءات رد المبلغ المدفوع.</strong><p>بعد التحقق من حالة العملية لدى مزوّد الدفع، يتم بدء إجراءات إلغاء العملية أو رد المبلغ إلى وسيلة الدفع الأصلية بحسب الحالة وما يتيحه مزوّد الدفع. لا يحتاج المستخدم إلى شراء الاشتراك مرة أخرى قبل التحقق من العملية الأولى.</p><p>إذا لم يُخصم أي مبلغ أصلًا، فلا يوجد مبلغ مدفوع لاسترداده. قد يختلف وقت ظهور المبلغ المسترد حسب البنك ومزوّد الدفع. لمتابعة الحالة، تواصل عبر واتساب على الرقم 01118980717.</p></div>'
+                  s = before + section + finish + after
+              p.write_text(s, encoding="utf-8")
 
-          privacy_path = Path("privacy-policy.html")
-          if privacy_path.exists():
-              privacy = privacy_path.read_text(encoding="utf-8")
-              old_contact = '<p><strong>رقم الهاتف:</strong> <a dir="ltr" class="email" href="tel:+201260019614">01260019614</a></p>'
-              new_contact = '<p><strong>رقم التواصل:</strong> <a dir="ltr" class="email" href="tel:+201118980717">01118980717</a></p><p><strong>واتساب:</strong> <a href="https://wa.me/201118980717" target="_blank" rel="noopener">التواصل عبر واتساب على 01118980717</a></p>'
-              if old_contact in privacy:
-                  privacy = privacy.replace(old_contact, new_contact, 1)
-              else:
-                  privacy = privacy.replace("01260019614", "01118980717").replace("+201260019614", "+201118980717")
-                  if '<h2>13. التواصل</h2>' in privacy and 'wa.me/201118980717' not in privacy:
-                      privacy = privacy.replace('<h2>13. التواصل</h2>', '<h2>13. التواصل</h2><p><strong>واتساب:</strong> <a href="https://wa.me/201118980717" target="_blank" rel="noopener">01118980717</a></p>', 1)
-
-              start = '<h2>10. سياسة الاسترجاع واسترداد المدفوعات</h2>'
-              end = '<h2>11. المدفوعات عبر الموقع والتطبيق</h2>'
-              if start in privacy and end in privacy:
-                  before, rest = privacy.split(start, 1)
-                  old_section, after = rest.split(end, 1)
-                  new_section = '''<h2>10. سياسة الاسترجاع واسترداد المدفوعات</h2><div class="refund"><strong>تخضع طلبات الاسترداد للتحقق من حالة عملية الدفع.</strong><p>إذا نجح الدفع وتعذر تفعيل الاشتراك بسبب خطأ تقني، قد يبدأ النظام طلب استرداد تلقائيًا عند توفر بيانات العملية المطلوبة. إذا كانت البيانات غير مكتملة أو احتاجت العملية إلى مراجعة من مزوّد الدفع، فقد يلزم التدخل اليدوي ومتابعة الطلب.</p><p>حالات الخصم دون تأكيد أو الخصم المكرر تُراجع أولًا لدى مزوّد الدفع قبل طلب الاسترداد.</p></div><p>عند الموافقة، يُطلب رد المبلغ إلى وسيلة الدفع الأصلية متى أتاح مزوّد الدفع ذلك. تختلف مدة ظهور المبلغ بحسب مزوّد الدفع والبنك، ولا توجد مدة ثابتة مضمونة.</p>'''
-                  privacy = before + new_section + end + after
-              privacy = privacy.replace("12 أكتوبر 2026", "13 أكتوبر 2026")
-              privacy_path.write_text(privacy, encoding="utf-8")
-
-          print("Policy page created; homepage pricing, menu, footer, and WhatsApp contact updated.")
+          # Standalone refund page
+          refund_lines = [
+            '<!doctype html>',
+            '<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2340"><title>سياسة الاسترجاع والدفع | SurveyQuant</title>',
+            '<style>*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f3f6fa;color:#263445;line-height:1.9}header{background:#0b2340;color:#fff;text-align:center;padding:30px 16px}main{max-width:900px;margin:25px auto;padding:clamp(19px,4vw,32px);background:#fff;border-radius:14px}h2{color:#123b60;font-size:20px;margin-top:25px}a{color:#0877bd;overflow-wrap:anywhere}p{font-size:15px}.notice{background:#edf4fb;padding:14px 16px;border-radius:8px}.refund{background:#edf8f1;border-right:4px solid #24834b;padding:14px 18px;border-radius:8px}.btn{display:inline-block;background:#123b60;color:#fff;border-radius:9px;padding:10px 15px;text-decoration:none}footer{text-align:center;padding:20px;color:#64748b;font-size:14px}</style></head>',
+            '<body><header><h1>سياسة الاسترجاع والدفع</h1><p>مكتب فني مساحة · SurveyQuant</p></header><main>',
+            '<p class="notice"><strong>آخر تحديث:</strong> 21 أكتوبر 2026.</p>',
+            '<h2>1. الفترة التجريبية المجانية</h2><p>الفترة التجريبية المجانية المعلنة لتطبيق SurveyQuant هي <strong>7 أيام</strong>. يجب التأكد من تفعيل الفترة وبدايتها داخل الإصدار المستخدم؛ عرض المدة على الموقع وحده لا يفعّل التجربة تلقائيًا داخل التطبيق.</p>',
+            '<h2>2. متى يتم رد المبلغ؟</h2><div class="refund"><p><strong>إذا تم خصم مبلغ ولم تكتمل عملية الدفع أو لم يتم تفعيل الاشتراك بعد تأكيد الخصم، تتم مراجعة العملية وبدء إجراءات رد المبلغ المدفوع إلى وسيلة الدفع الأصلية.</strong></p><p>لا يحتاج المستخدم إلى شراء الاشتراك مرة ثانية قبل التحقق من حالة العملية الأولى. وإذا لم يتم خصم أي مبلغ، فلا يوجد مبلغ مدفوع لاسترداده.</p></div>',
+            '<h2>3. مدة الاسترجاع</h2><p>بعد التحقق من حالة الدفع، يتم بدء إجراءات الإلغاء أو الاسترداد بحسب حالة العملية وما يتيحه مزوّد الدفع. قد يختلف وقت ظهور المبلغ حسب البنك ومزوّد الدفع، ولا يعني بدء الإجراء أن الرصيد سيظهر فورًا.</p>',
+            '<h2>4. الدفع عبر الموقع</h2><p class="notice">الموقع التعريفي لا يستقبل المدفوعات الإلكترونية في الوقت الحالي. لا ترسل بيانات البطاقة كاملة أو رمز CVV أو كلمات المرور أو رموز التحقق عبر الهاتف أو البريد أو واتساب.</p>',
+            '<h2>5. التواصل عبر واتساب</h2><p>لمتابعة عملية دفع أو طلب استرجاع، تواصل على الرقم <strong>01118980717</strong> واذكر تاريخ العملية وقيمتها ومرجع الطلب إن وجد. لا ترسل رقم البطاقة كاملًا أو رمز الأمان.</p>',
+            '<p><a class="btn" href="https://wa.me/201118980717?text=%D9%85%D8%AA%D8%A7%D8%A8%D8%B9%D8%A9%20%D8%A7%D8%B3%D8%AA%D8%B1%D8%AC%D8%A7%D8%B9%20SurveyQuant" target="_blank" rel="noopener noreferrer">التواصل عبر واتساب</a></p>',
+            '<p>البريد الإلكتروني: <a href="mailto:abo.abdalla72229@gmail.com">abo.abdalla72229@gmail.com</a></p><p><a class="btn" href="privacy-policy.html">سياسة الخصوصية</a> <a class="btn" href="./index.html">العودة إلى الموقع</a></p>',
+            '</main><footer>© 2026 مكتب فني مساحة · SurveyQuant</footer></body></html>'
+          ]
+          Path("refund-policy.html").write_text("\n".join(refund_lines), encoding="utf-8")
+          print("Updated homepage and privacy policy; created refund-policy.html.")
           PY
-
-      - name: Validate changes
+      - name: Validate pages
+        shell: bash
         run: |
+          set -euo pipefail
+          test -s index.html
+          test -s privacy-policy.html
           test -s refund-policy.html
+          grep -q '7 أيام مجانية' index.html
+          grep -q '01118980717' index.html
+          grep -q '7 أيام' refund-policy.html
+          grep -q 'wa.me/201118980717' refund-policy.html
           grep -q 'سياسة الاسترجاع' index.html
-          grep -q 'wa.me/201118980717' index.html
-          grep -q '01118980717' refund-policy.html
           git diff --check
-
-      - name: Commit and publish changes
+      - name: Commit and publish
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html privacy-policy.html refund-policy.html
@@ -131,5 +138,5 @@ jobs:
             echo "No changes to publish."
             exit 0
           fi
-          git commit -m "Add refund policy and WhatsApp contact to website"
+          git commit -m "Publish 7-day trial and refund policy"
           git push
